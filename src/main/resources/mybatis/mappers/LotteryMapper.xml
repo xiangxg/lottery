@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.hx.bat.sso.mapper.LotteryMapper" >
+  <resultMap id="BaseResultMap" type="cn.hx.bat.sso.pojo.Lottery" >
+    <!--
+      WARNING - @mbggenerated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="area" property="area" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="lottery_num" property="lotteryNum" jdbcType="VARCHAR" />
+    <result column="day_periods" property="dayPeriods" jdbcType="VARCHAR" />
+    <result column="toal_periods" property="toalPeriods" jdbcType="VARCHAR" />
+    <result column="open_time" property="openTime" jdbcType="DATE" />
+    <result column="prize_cache" property="prizeCache" jdbcType="VARCHAR" />
+  </resultMap>
+  <select id="queryGroup" parameterType="int" resultType="cn.hx.bat.sso.pojo.Lottery">
+  	select `name`,area,count(*) as num from lottery GROUP BY `name`,area HAVING num&gt;#{num};
+  </select>
+  
+  <delete id="deleteRedundantData">
+  delete from lottery where `name`=#{name} and area=#{area} and id not IN
+			(select t.id from (select id from lottery where `name`=#{name} and area=#{area} 
+			order by open_time DESC,toal_periods DESC limit #{num} )t);
+  
+  </delete>
+  
+  <select id="findPage" resultType="cn.hx.bat.sso.pojo.Lottery">
+		  select * from lottery where 1=1 
+		  <if test="name != null">
+		  and `name`=#{name}
+		  </if>
+		  <if test="area != null">
+		    and area=#{area}
+		  </if>
+		  order by open_time desc,toal_periods desc
+  		limit #{start},#{count};
+  </select>
+</mapper>
